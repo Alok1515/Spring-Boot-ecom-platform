@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class CategoryController {
 
     private final CategoryService categoryService;
@@ -20,12 +21,14 @@ public class CategoryController {
     }
 
     @GetMapping("/api/public/categories")
+    //@RequestMapping(value = "/api/public/categories", method = RequestMethod.GET)
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    @PostMapping("/api/public/categories")
+   @PostMapping("/api/public/categories")
+   //@RequestMapping(value = "/api/public/categories", method = RequestMethod.POST)
     public ResponseEntity<String> createCategory(@RequestBody Category category) {
         categoryService.createCategory(category);
         return new ResponseEntity<>("Category Added Successfully", HttpStatus.CREATED);
