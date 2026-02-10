@@ -42,33 +42,51 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void createCategory(Category category) {
-        Category savedCategory = categoryRepository.findByCategoryName(category.getCategoryName());
-        if(savedCategory != null)
-            throw new APIException("Category with name " + category.getCategoryName() + " already exists!!");
-        categoryRepository.save(category);
+    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+
+        // Convert DTO → Entity
+        Category category = modelMapper.map(categoryDTO, Category.class);
+
+        // Check duplicate
+        Category categoryFromDb =
+                categoryRepository.findByCategoryName(category.getCategoryName());
+
+        if (categoryFromDb != null) {
+            throw new APIException(
+                    "Category with name " + category.getCategoryName() + " already exists!!"
+            );
+        }
+
+        // Save entity
+        Category savedCategory = categoryRepository.save(category);
+
+        // Convert Entity → DTO and return
+        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
 
+
     @Override
-    public String deleteCategory(Long categoryId) {
+    public CategoryDTO deleteCategory(Long categoryId) {
 
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
         categoryRepository.delete(category);
 
-        return "Category with ID " + categoryId + " deleted successfully!";
+        return modelMapper.map(category, CategoryDTO.class);
     }
 
     @Override
-    public Category updateCategory(Category category, Long categoryId) {
+    public CategoryDTO updateCategory(CategoryDTO categoryDTO, Long categoryId) {
 
         Category savedCategory = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
+        Category category = modelMapper.map(categoryDTO, Category.class);
+        category.setCategoryId(categoryId);
         // ✅ Update only the name
-        savedCategory.setCategoryName(category.getCategoryName());
+        savedCategory = categoryRepository.save(category);
 
-        return categoryRepository.save(savedCategory);
+        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
 }
